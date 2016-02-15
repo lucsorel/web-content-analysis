@@ -1,0 +1,19 @@
+{
+  "name": "web-content-analysis",
+  "version": "0.0.1",
+  "description": "Html content analysis",
+  "private": false,
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Luc Sorel",
+  "license": "MIT",
+  "dependencies": {
+    "cheerio": "^0.20.0",
+    "express": "^4.13.4",
+    "request": "^2.69.0",
+    "socket-io-ng-service": "lucsorel/socket-io-ng-service",
+    "socket.io": "^1.4.5"
+  }
+}

@@ -1,0 +1,41 @@
+.navbar {
+    height: 50px;
+}
+.navbar-brand {
+    height: 50px;
+    padding: 5px;
+}
+.navbar-brand img {
+    height: 50px;
+    border-radius: 5px;
+}
+.page-header {
+    margin-top: 62px;
+}
+#urlToScrap {
+    width: 600px;
+}
+.word {
+    display: inline-block;
+    border: 1px solid;
+    border-radius: 0.5em;
+    background: grey;
+    padding: 0.5em;
+    width: 100%;
+    margin-bottom: 0.5em;
+}
+.word .wordTitle .wordLabel {
+    font-weight: bold;
+}
+.word .wordTitle .wordWeight {
+    color: #bbb;
+}
+.word .wordTitle {
+	border-bottom: thin dotted #bbb;
+    padding-bottom: 0.3em;
+    margin-bottom: 0.3em;
+}
+.word .wordTags .tag {
+    margin-right: 0.3em;
+    display: inline-block;
+}
