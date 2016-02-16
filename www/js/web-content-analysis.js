@@ -39,14 +39,16 @@ angular.module('WebContentAnalysis', ['ui.router', 'SocketIoNgService'])
     .controller('ContentController', ['$state', 'url', 'content', function($state, url, content) {
         var contentCtrl = this,
             tagWeights = {
-                title: 10,
+                title: 15,
                 h1: 10,
                 h2: 9,
                 h3: 8,
                 h4: 7,
                 h5: 6,
                 h6: 5,
-                a: 3
+                a: 3,
+                strong: 2,
+                b: 2
             };
 
         contentCtrl.url = url;
