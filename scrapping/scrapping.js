@@ -18,7 +18,6 @@ function onResponseFactory(callback) {
         if (error) {
             callback({ isErr: true, error: error });
         }
-
         var $ = cheerio.load(responseBody, parseOptions),
             body = $('body'),
             wordsCache = {},
@@ -68,7 +67,11 @@ function parseFactory(wordsCache, $) {
 }
 
 function scrapPage(url, callback) {
-    request(url, onResponseFactory(callback));
+    request({
+        method: 'GET',
+        uri: url,
+        gzip: true
+    }, onResponseFactory(callback));
 }
 
 module.exports = {
