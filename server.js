@@ -8,6 +8,7 @@ var express = require('express'),
 // serves the static files
 contentAnalysisApp.use(express.static('www'));
 contentAnalysisApp.use(express.static('node_modules/socket-io-ng-service/libs'));
+contentAnalysisApp.use(express.static('node_modules/ui-router-menu-service/libs'));
 
 // starts the web aplication server on the configured HTTP port
 http.listen(httpPort, function() {

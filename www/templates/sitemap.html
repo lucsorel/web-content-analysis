@@ -1,0 +1,22 @@
+<div class="container">
+    <div class="row">
+        <div class="col-xd-12">
+            <h2>Url to the sitemap XML file</h2>
+            <form name="urlForm" class="form-inline" novalidate="" ng-submit="urlForm.$valid && sitemapCtrl.scrap()">
+                <div class="form-group">
+                    <label class="sr-only" for="urlToScrap">Url of the sitemap XML file</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">URL</div>
+                        <input type="url" required="" class="form-control" id="urlToScrap" name="urlToScrap" placeholder="http..."
+                            ng-model="sitemapCtrl.url"/>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" ng-disabled="sitemapCtrl.loading">Analyze sitemap</button>
+                <p class="text-danger" ng-show="urlForm.$submitted && ((urlForm.urlToScrap.$error.url) || (urlForm.urlToScrap.$error.required))">
+                    A valid URL is required.
+                </p>
+            </form>
+        </div>
+    </div>
+</div>

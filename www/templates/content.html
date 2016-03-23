@@ -1,7 +1,7 @@
 <div class="container">
     <div class="row">
         <div class="col-xd-12">
-            <h2>Url to analyze</h2>
+            <h2>Url of the page to analyze</h2>
             <form name="urlForm" class="form-inline" novalidate="" ng-submit="urlForm.$valid && contentCtrl.scrap()">
                 <div class="form-group">
                     <label class="sr-only" for="urlToScrap">Url to scrap</label>
@@ -21,12 +21,17 @@
     </div>
     <div class="row">
         <div class="col-xd-12">
-            <h2>Content</h2>
+            <div ng-show="contentCtrl.words || contentCtrl.loading">
+                <h2>Content</h2>
+                <p>Each word is given a score depending on the HTML tags where it has been found. Words are displayed by descreasing scores.</p>
+            </div>
+
             <div class="progress" ng-show="contentCtrl.loading">
                 <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
             </div>
         </div>
     </div>
+
     <div class="row" ng-hide="contentCtrl.loading">
         <div class="col-lg-3 col-md-4 col-sm-4 " ng-repeat="word in contentCtrl.words | orderBy:'-weight' track by word.label">
             <div class="word">

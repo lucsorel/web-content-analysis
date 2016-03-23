@@ -1,0 +1,26 @@
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#webapp-navbar-collapse" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="https://www.podbox.com/" target="_blank" title="Powered by Podbox"><img src="/style/podbox-logo.png" alt="Podbox logo" /></a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="webapp-navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li ng-class="menuCtrl.page.name == 'content' ? 'active' : ''"><a href="#/content/">Content analysis</a></li>
+                <li ng-class="menuCtrl.page.name == 'sitemap' ? 'active' : ''"><a href="#/sitemap/">Sitemap analysis</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="page-header">
+    <div ui-view="content"></div>
+    <div ui-view="sitemap"></div>
+</div>
