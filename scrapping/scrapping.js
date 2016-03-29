@@ -106,6 +106,5 @@ function scrapPage(url, callback) {
 
 // packages the scrapping utilities
 module.exports = {
-    scrapPage: scrapPage,
-    retrieveSitemap: retrieveSitemap
+    scrapPage: scrapPage
 };
