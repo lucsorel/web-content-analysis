@@ -13,22 +13,45 @@ var request = require('request'),
         normalizeWhitespace: true
     };
 
-function onResponseFactory(callback) {
+/**
+ * Generic scrapping response factory
+ *
+ * @param contentProcessor processes the response body of the request when no error occurred
+ * @param callback applied to the content provided by the contentProcessor
+ * @return
+ */
+function onResponseFactory(contentProcessor, callback) {
     return function(error, response, responseBody) {
         if (error) {
             callback({ isErr: true, error: error });
         }
-        var $ = cheerio.load(responseBody, parseOptions),
-            body = $('body'),
-            wordsCache = {},
-            wordWeight, tagWeight;
 
-        body.children().each(parseFactory(wordsCache, $));
-
-        callback({ content: wordsCache });
+        callback({ content: contentProcessor(responseBody) });
     }
 }
 
+/**
+ * Parses the html body to extract the occurrences of the tags where a word is found
+ *
+ * @param responseBody
+ * @return a cache associating each word with the occurrences of the tags where it has been found
+ */
+function scrappingContentProcessor(responseBody) {
+    var $ = cheerio.load(responseBody, parseOptions),
+        body = $('body'),
+        wordsCache = {};
+
+    body.children().each(parseFactory(wordsCache, $));
+
+    return wordsCache;
+}
+
+/**
+ * Recursively parses the HTML document to populate the word cache
+ *
+ * @param wordsCache
+ * @param $ the response wrapped by the cheerio utility
+ */
 function parseFactory(wordsCache, $) {
     function parse(index, element) {
         var elementTagName = element.name,
@@ -57,6 +80,7 @@ function parseFactory(wordsCache, $) {
                         else {
                             count = wordsCache[word][elementTagName] + 1;
                         }
+
                         wordsCache[word][elementTagName] = count;
                     });
             }
@@ -66,14 +90,22 @@ function parseFactory(wordsCache, $) {
     return parse;
 }
 
+/**
+ * Requests the given page to scrap its content. The scrapped words cache is applied to the given callback
+ *
+ * @param url
+ * @param callback
+ */
 function scrapPage(url, callback) {
     request({
         method: 'GET',
         uri: url,
         gzip: true
-    }, onResponseFactory(callback));
+    }, onResponseFactory(scrappingContentProcessor, callback));
 }
 
+// packages the scrapping utilities
 module.exports = {
-    scrapPage: scrapPage
+    scrapPage: scrapPage,
+    retrieveSitemap: retrieveSitemap
 };
