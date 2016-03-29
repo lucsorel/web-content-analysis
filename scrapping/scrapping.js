@@ -16,7 +16,9 @@ var request = require('request'),
 /**
  * Generic scrapping response factory
  *
- * @param contentProcessor processes the response body of the request when no error occurred
+ * @param contentProcessor processes the response body of the request when no error occurred.
+ *        It should be a function with a single parameter holding the text of the response.
+ *        It should return the content to be passed to the callback.
  * @param callback applied to the content provided by the contentProcessor
  * @return
  */
@@ -28,6 +30,32 @@ function onResponseFactory(contentProcessor, callback) {
 
         callback({ content: contentProcessor(responseBody) });
     }
+}
+
+function sitemapContentProcessor(responseBody) {
+    var $ = cheerio.load(responseBody, parseOptions),
+        urls = $('urlset'),
+        sitemap = [];
+
+    urls.children().each(function(index, element) {
+        // processes sitemap url tags only
+        if ('url' === element.name) {
+            var urlElementName, sitemapEntry;
+            $(element).children().each(function(index, urlElement) {
+                urlElementName = urlElement.name
+                if ('loc' === urlElementName || 'priority' === urlElementName || 'changefreq' === urlElementName || 'lastmod' === urlElementName) {
+                    sitemapEntry = sitemapEntry || {};
+                    sitemapEntry[urlElementName] = $(urlElement).text();
+                }
+            });
+            // adds only valid sitemap entries
+            if (sitemapEntry) {
+                sitemap.push(sitemapEntry);
+            }
+        }
+    });
+
+    return sitemap;
 }
 
 /**
@@ -93,7 +121,7 @@ function parseFactory(wordsCache, $) {
 /**
  * Requests the given page to scrap its content. The scrapped words cache is applied to the given callback
  *
- * @param url
+ * @param url of the page holding the content to scrap
  * @param callback
  */
 function scrapPage(url, callback) {
@@ -104,7 +132,16 @@ function scrapPage(url, callback) {
     }, onResponseFactory(scrappingContentProcessor, callback));
 }
 
+function retrieveSitemap(url, callback) {
+    request({
+        method: 'GET',
+        uri: url,
+        gzip: true
+    }, onResponseFactory(sitemapContentProcessor, callback));
+}
+
 // packages the scrapping utilities
 module.exports = {
-    scrapPage: scrapPage
+    scrapPage: scrapPage,
+    retrieveSitemap: retrieveSitemap
 };

@@ -17,11 +17,6 @@ angular.module('WebContentAnalysis', ['ui.router', 'SocketIoNgService', 'UiRoute
                     url: ['$stateParams', '$q', function($stateParams, $q) {
                         return $q.when($stateParams.contentUrl);
                     }]
-                    // ,
-                    // // ensures a valid (or empty) url to analyze is preset
-                    // content: ['contentService', 'url', function(contentService, url) {
-                    //     return contentService.getContent(url);
-                    // }]
                 },
                 views: {
                     content: {
@@ -52,17 +47,31 @@ angular.module('WebContentAnalysis', ['ui.router', 'SocketIoNgService', 'UiRoute
         $urlRouterProvider.otherwise('/content/');
     }])
     .factory('contentService', ['$q', 'socketService', function($q, socketService) {
+        function isStringNotEmpty(text) {
+            return 'string' === typeof text && text.length > 0;
+        }
+
         var contentService = {
             getContent: function(contentUrl) {
                 // returns the content for the given url
-                if ('string' === typeof contentUrl && contentUrl.length > 0) {
+                if (isStringNotEmpty(contentUrl)) {
                     return socketService.qemit('getContent', contentUrl);
                 }
                 // no content for empty urls
                 else {
                     return $q.when();
                 }
+            },
 
+            getSitemap: function(sitemapUrl) {
+                // returns the sitemap for the given url
+                if (isStringNotEmpty(sitemapUrl)) {
+                    return socketService.qemit('getSitemap', sitemapUrl);
+                }
+                // no content for empty urls
+                else {
+                    return $q.when();
+                }
             }
         };
 
@@ -71,9 +80,37 @@ angular.module('WebContentAnalysis', ['ui.router', 'SocketIoNgService', 'UiRoute
     .controller('MenuController', ['menuService', function(menuService) {
         this.page = menuService.page;
     }])
-    .controller('SitemapController', ['$state', 'url', function($state, url) {
+    .controller('SitemapController', ['$state', 'url', 'contentService', function($state, url, contentService) {
         var sitemapCtrl = this;
         sitemapCtrl.url = url;
+
+        // reloads the state with the defined url
+        sitemapCtrl.scrap = function() {
+            sitemapCtrl.loading = true;
+            $state.go('root.sitemap', {
+                sitemapUrl: sitemapCtrl.url
+            });
+        }
+
+        // starts scrapping the sitemap
+        sitemapCtrl.loading = true;
+        contentService.getSitemap(url).then(function(sitemap) {
+            sitemapCtrl.loading = false;
+            if (sitemap) {
+                if (sitemap.isErr) {
+                    sitemapCtrl.failure = 'Failed to retrieve sitemap from ' + url;
+                    sitemapCtrl.error = sitemap.error;
+                }
+                else {
+                    console.log('sitemap:');
+                    console.log(sitemap);
+                    sitemapCtrl.sitemap = sitemap.content;
+                }
+            }
+        }, function() {
+            sitemapCtrl.loading = false;
+            sitemapCtrl.failure = 'Failed to retrieve sitemap from ' + url;
+        });
     }])
     .controller('ContentController', ['$state', 'url', 'contentService', function($state, url, contentService) {
         var contentCtrl = this,
@@ -92,7 +129,6 @@ angular.module('WebContentAnalysis', ['ui.router', 'SocketIoNgService', 'UiRoute
             };
 
         contentCtrl.url = url;
-        contentCtrl.loading = false;
 
         contentCtrl.scrap = function() {
             contentCtrl.loading = true;
@@ -106,7 +142,7 @@ angular.module('WebContentAnalysis', ['ui.router', 'SocketIoNgService', 'UiRoute
                 contentCtrl.loading = false;
                 if ('object' === typeof content) {
                     if (content.isErr) {
-                        contentCtrl.failure = 'Failed to retrieve content from ' + contentCtrl.url;
+                        contentCtrl.failure = 'Failed to retrieve content from ' + url;
                         contentCtrl.error = content.error;
                     }
                     else {
@@ -125,6 +161,7 @@ angular.module('WebContentAnalysis', ['ui.router', 'SocketIoNgService', 'UiRoute
                 }
             }, function() {
                 contentCtrl.loading = false;
+                contentCtrl.failure = 'Failed to retrieve content from ' + url;
             }
         );
     }])

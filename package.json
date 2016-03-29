@@ -1,7 +1,7 @@
 {
   "name": "web-content-analysis",
   "version": "0.0.1",
-  "description": "Html content analysis",
+  "description": "Web content analysis",
   "private": false,
   "main": "server.js",
   "scripts": {
