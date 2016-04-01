@@ -23,7 +23,7 @@
     <div class="row">
         <div class="col-xd-12">
             <div ng-show="sitemapCtrl.sitemap || sitemapCtrl.loading">
-                <h2>Sitemap</h2>
+                <h2>Sitemap analysis</h2>
             </div>
 
             <div class="progress" ng-show="sitemapCtrl.loading">
@@ -31,22 +31,55 @@
             </div>
         </div>
     </div>
-    <div class="row" ng-hide="sitemapCtrl.loading">
-        <table class="table table-striped table-hover">
-            <thead>
-                <th>Location</th>
-                <th>Priority</th>
-                <th>Change frequency</th>
-                <th>Last modification date</th>
-            </thead>
-            <tbody>
-                <tr ng-repeat="url in sitemapCtrl.sitemap">
-                    <td><a ng-href="{{::url.loc}}" target="_blank">{{::url.loc}}</a></td>
-                    <td>{{::url.priority}}</td>
-                    <td>{{::url.changefreq}}</td>
-                    <td>{{::url.lastmod}}</td>
-                </tr>
-            </tbody>
-        </table>
+    <div ng-show="sitemapCtrl.sitemap.length">
+        <div class="row" ng-if="sitemapCtrl.duplicates.length">
+            <h3>Duplicate entries</h3>
+            <div class="text-danger" ng-repeat="duplicate in sitemapCtrl.duplicates track by duplicate">{{::duplicate}}</div>
+        </div>
+
+        <div class="row">
+            <h3>Sitemap details</h3>
+            <p>{{sitemapCtrl.sitemap.length}} unique urls.</p>
+
+            <button type="button" ng-disabled="url.verifying" class="btn btn-primary" ng-click="sitemapCtrl.verify()">
+                Verify selected urls (HTTP status, page title)
+            </button>
+
+            <table class="table table-striped table-hover">
+                <thead>
+                    <th>
+                        <input type="checkbox" title="select/deselect all" ng-model="sitemapCtrl.selectAll">
+                    </th>
+                    <th>
+                        Location
+                        <input type="text" name="locFilter" placeholder="Filter"
+                            ng-model="sitemapCtrl.entryfilter.loc" ng-model-options="{debounce: 700}"/>
+                    </th>
+                    <th>Priority</th>
+                    <th>Change frequency</th>
+                    <th>Last edition</th>
+                    <th>Status</th>
+                    <th>Title</th>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="url in sitemapCtrl.sitemap | filter:sitemapCtrl.entryfilter track by url.loc">
+                        <td><input type="checkbox" name="{{::url.loc}}" value="" ng-model="url.verify" /></td>
+                        <td>
+                            <a ng-href="{{::url.loc}}" target="_blank">{{::url.loc}}</a>
+                            <div ng-if="url.redirect">
+                                -> {{url.redirect}}
+                            </div>
+                        </td>
+                        <td>{{::url.priority}}</td>
+                        <td>{{::url.changefreq}}</td>
+                        <td>{{::url.lastmod}}</td>
+                        <td>
+                            <span ng-class="url.status < 400 ? 'text-primary' : (url.status < 500 ? 'text-warning' : 'text-danger')">{{url.status}}</span>
+                        </td>
+                        <td>{{url.title}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
