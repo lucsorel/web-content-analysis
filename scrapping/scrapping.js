@@ -15,21 +15,19 @@ var request = require('request'),
     RSVP = require('rsvp');
 
 /**
- * Generic scrapping response factory
+ * Generic content processing factory
  *
  * @param contentProcessor processes the response body of the request when no error occurred.
- *        It should be a function with a single parameter holding the text of the response.
- *        It should return the content to be passed to the callback.
- * @param callback applied to the content provided by the contentProcessor
- * @return
+ *        It should be a function with 2 parameters: the text of the response, the deferred to resolve.
+ * @param deferred
  */
-function onResponseFactory(contentProcessor, callback) {
+function onResponseFactory(contentProcessor, deferred) {
     return function(error, response, responseBody) {
         if (error) {
-            callback({ isErr: true, error: error });
+            deferred.reject(error);
         }
 
-        callback({ content: contentProcessor(responseBody) });
+        contentProcessor(responseBody, deferred);
     }
 }
 
@@ -37,9 +35,9 @@ function onResponseFactory(contentProcessor, callback) {
  * Parses the XML content of sitemap
  *
  * @param responseBody
- * @return JSON representation of the sitemap
+ * @param deferred JSON representation of the sitemap
  */
-function sitemapContentProcessor(responseBody) {
+function sitemapContentProcessor(responseBody, deferred) {
     var $ = cheerio.load(responseBody, parseOptions),
         // root tag is 'urlset', entry tags are 'url'
         urls = $('urlset'),
@@ -72,23 +70,23 @@ function sitemapContentProcessor(responseBody) {
         }
     });
 
-    return sitemap;
+    deferred.resolve(sitemap);
 }
 
 /**
  * Parses the html body to extract the occurrences of the tags where a word is found
  *
  * @param responseBody
- * @return a cache associating each word with the occurrences of the tags where it has been found
+ * @return a promise resolving to a cache associating each word with the occurrences of the tags where it has been found
  */
-function scrappingContentProcessor(responseBody) {
+function scrappingContentProcessor(responseBody, deferred) {
     var $ = cheerio.load(responseBody, parseOptions),
         body = $('body'),
         wordsCache = {};
 
     body.children().each(parseFactory(wordsCache, $));
 
-    return wordsCache;
+    deferred.resolve(wordsCache);
 }
 
 /**
@@ -139,14 +137,17 @@ function parseFactory(wordsCache, $) {
  * Requests the given page to scrap its content. The scrapped words cache is applied to the given callback
  *
  * @param url of the page holding the content to scrap
- * @param callback
+ * @return a promise of the scrapped page
  */
-function scrapPage(url, callback) {
+function scrapPage(url) {
+    var deferredScrappedPage = RSVP.defer();
     request({
         method: 'GET',
         uri: url,
         gzip: true
-    }, onResponseFactory(scrappingContentProcessor, callback));
+    }, onResponseFactory(scrappingContentProcessor, deferredScrappedPage));
+
+    return deferredScrappedPage.promise;
 }
 
 /**
@@ -156,6 +157,7 @@ function scrapPage(url, callback) {
  * @param callback
  */
 function retrieveSitemap(url, callback) {
+    var deferredSitemap = RSVP.defer();
     request({
         method: 'GET',
         uri: url,
@@ -163,7 +165,9 @@ function retrieveSitemap(url, callback) {
         headers: {
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
         }
-    }, onResponseFactory(sitemapContentProcessor, callback));
+    }, onResponseFactory(sitemapContentProcessor, deferredSitemap));
+
+    return deferredSitemap.promise;
 }
 
 /**

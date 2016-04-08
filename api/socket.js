@@ -4,6 +4,17 @@ var Rx = require('rx'),
     // waits 300ms between each verification
     delay = Rx.Observable.empty().delay(300);
 
+function onSuccess(callback) {
+    return function(value) {
+        callback({ content: value });
+    }
+}
+function onError(callback) {
+    return function(error) {
+        callback({ isErr: true, error: error });
+    }
+}
+
 module.exports = function(scrapping) {
     return function(socket) {
         // creates the events channel for url verification
@@ -23,11 +34,11 @@ module.exports = function(scrapping) {
             verificationSubscription = null;
 
         socket.on('getContent', function(contentUrl, callback) {
-            scrapping.scrapPage(contentUrl, callback);
+            scrapping.scrapPage(contentUrl).then(onSuccess(callback), onError(callback));
         });
 
         socket.on('getSitemap', function(sitemapUrl, callback) {
-            scrapping.retrieveSitemap(sitemapUrl, callback);
+            scrapping.retrieveSitemap(sitemapUrl).then(onSuccess(callback), onError(callback));
         });
 
         // subscribes to the url verification channel if necessary
