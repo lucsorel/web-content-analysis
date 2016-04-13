@@ -1,5 +1,14 @@
 angular.module('WebContentAnalysis', ['ui.router', 'SocketIoNgService', 'UiRouterMenuService'])
-    .config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
+    .config(['$stateProvider', '$urlRouterProvider', '$urlMatcherFactoryProvider', function($stateProvider, $urlRouterProvider, $urlMatcherFactoryProvider) {
+        // defines a custom parameter type to prevent the escaping of url slashes
+        var uriTypePattern = /.*/;
+        function valToString(val) { return val !== null ? val.toString() : val; }
+        function regexpMatches(val) { return uriTypePattern.test(val); }
+        $urlMatcherFactoryProvider.type('uriType', {
+          encode: valToString, decode: valToString, is: regexpMatches, pattern: uriTypePattern
+        });
+
+        // routing
         $stateProvider
             // define a root state with the MenuController which will handle the menu
             .state('root', {
@@ -9,7 +18,7 @@ angular.module('WebContentAnalysis', ['ui.router', 'SocketIoNgService', 'UiRoute
                 controller: 'MenuController as menuCtrl'
             })
             .state('root.content', {
-                url: 'content/{contentUrl:.*}',
+                url: 'content/{contentUrl:uriType}',
                 resolve: {
                     page: ['menuService', function(menuService) {
                         return menuService.setViewName('content');
@@ -26,7 +35,7 @@ angular.module('WebContentAnalysis', ['ui.router', 'SocketIoNgService', 'UiRoute
                 }
             })
             .state('root.sitemap', {
-                url: 'sitemap/{sitemapUrl:.*}',
+                url: 'sitemap/{sitemapUrl:uriType}',
                 resolve: {
                     page: ['menuService', function(menuService) {
                         return menuService.setViewName('sitemap');
