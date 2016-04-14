@@ -11,6 +11,7 @@ var request = require('request'),
         lowerCaseTags: true,
         normalizeWhitespace: true
     },
+    urllib = require('url'),
     // promise library
     RSVP = require('rsvp');
 
@@ -173,10 +174,11 @@ function retrieveSitemap(url, callback) {
 /**
  * Handler factory for verification requests
  *
- * @param url the url being verified
+ * @param url the key-url being verified
+ * @param requestedUrl the path-encoded url requested
  * @param callback to apply on the verification
  */
-function onUrlVerificationResponseFactory(url, callback) {
+function onUrlVerificationResponseFactory(url, requestedUrl, callback) {
     return function(error, response, responseBody) {
         // flags the url of the verified url
         var verification = { url: url };
@@ -196,7 +198,7 @@ function onUrlVerificationResponseFactory(url, callback) {
                  };
 
             // flags whether a redirection occurred
-            if (response && response.request && response.request.href !== url) {
+            if (response && response.request && response.request.href !== requestedUrl) {
                 content.redirect = response.request.href;
             }
 
@@ -216,16 +218,27 @@ function onUrlVerificationResponseFactory(url, callback) {
  */
 function verifyUrl(url) {
     // initializes the deferred verification
-    var deferredVerification = RSVP.defer();
+    var deferredVerification = RSVP.defer(),
+        // prevents double decoding
+        requestedUrl = decodeURIComponent(url);
+
+    // encodes path if needed
+    var parts = urllib.parse(requestedUrl);
+    if (parts.pathname) {
+        parts.pathname = parts.pathname.split('/').map(function (part) {
+            return encodeURIComponent(part);
+        }).join('/');
+        requestedUrl = urllib.format(parts);
+    }
 
     request({
         method: 'GET',
-        uri: url,
+        uri: requestedUrl,
         gzip: true,
         headers: {
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
         }
-    }, onUrlVerificationResponseFactory(url, function(verification) {
+    }, onUrlVerificationResponseFactory(url, requestedUrl, function(verification) {
         deferredVerification.resolve(verification);
     }));
 
