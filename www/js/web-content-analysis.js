@@ -1,4 +1,7 @@
 angular.module('WebContentAnalysis', ['ui.router', 'SocketIoNgService', 'UiRouterMenuService'])
+    .config(['$locationProvider', function($locationProvider) {
+        $locationProvider.hashPrefix('');
+    }])
     .config(['$stateProvider', '$urlRouterProvider', '$urlMatcherFactoryProvider', function($stateProvider, $urlRouterProvider, $urlMatcherFactoryProvider) {
         // defines a custom parameter type to prevent the escaping of url slashes
         var uriTypePattern = /.*/;

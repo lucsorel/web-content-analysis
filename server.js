@@ -11,7 +11,7 @@ contentAnalysisApp.use(express.static('node_modules/socket-io-ng-service/libs'))
 contentAnalysisApp.use(express.static('node_modules/ui-router-menu-service/libs'));
 contentAnalysisApp.use(express.static('node_modules/angular'));
 contentAnalysisApp.use(express.static('node_modules/angular-sanitize'));
-contentAnalysisApp.use(express.static('node_modules/angular-ui-router/release'));
+contentAnalysisApp.use(express.static('node_modules/@uirouter/angularjs/release'));
 
 // starts the web aplication server on the configured HTTP port
 http.listen(httpPort, function() {
