@@ -6,7 +6,18 @@ This Node.js webapp is a small tool for SEO with 2 functionalities which can be 
 
 ## HTML analysis
 
-This tab parses the content of a given url (`http://www.lucsorel.com/` for example) and displays the words by a decreasing order of importance, according to some weights assigned to different html tags. Being displayed in a `h1` tag brings more weight to a word than being displayed in a `h2` tag, and so on). The weighs are (rather arbitrarily) [defined on the front-end side](https://github.com/lucsorel/web-content-analysis/blob/master/www/js/web-content-analysis.js#L227-L239). See the result of the [analysis of the `http://www.lucsorel.com/` page](https://web-content-analysis.herokuapp.com/#/content/http://www.lucsorel.com/).
+This tab parses the content of a given url (`http://www.lucsorel.com/` for example) and displays the words by a decreasing order of importance, according to some weights assigned to different html tags. Being displayed in a `h1` tag brings more weight to a word than being displayed in a `h2` tag, and so on). The weighs are (rather arbitrarily) [defined on the front-end side](https://github.com/lucsorel/web-content-analysis/blob/master/www/js/web-content-analysis.js#L227-L239).
+
+In the result of the [analysis of the `http://www.lucsorel.com/` page](https://web-content-analysis.herokuapp.com/#/content/http://www.lucsorel.com/), you can interpret:
+
+```
+ virtual: 33
+a: 3  h2: 2  b: 1
+```
+
+as:
+* a total weight of 23 for the word `virtual`
+* which appears 3 times in a `<a>` tag, 2ce in a `<h2>` tag and 1ce in a `<b>` tag
 
 ## Sitemap.xml analysis
 
